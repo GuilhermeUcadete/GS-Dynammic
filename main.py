@@ -41,3 +41,48 @@ def portfolio_greedy(projetos, capacidade):
             valor_total += valor
 
     return selecionados, valor_total
+
+# =============================================================================
+# Fase 2: Solução Recursiva Pura
+# COMPLEXIDADE: O(2^n)
+# Explora todas as combinações, recalcula subproblemas várias vezes.
+# =============================================================================
+def portfolio_recursivo(i, capacidade, projetos):
+    """
+    Exploração total das combinações. Não usa memória extra, é ineficiente para n grande.
+    """
+    if i < 0 or capacidade <= 0:
+        return 0
+    nome, valor, horas = projetos[i]
+    if horas > capacidade:
+        return portfolio_recursivo(i - 1, capacidade, projetos)
+    else:
+        return max(
+            portfolio_recursivo(i - 1, capacidade, projetos),
+            valor + portfolio_recursivo(i - 1, capacidade - horas, projetos)
+        )
+
+# =============================================================================
+# Fase 3: Programação Dinâmica Top-Down (Memoização)
+# COMPLEXIDADE: O(n*C) — cada subproblema (i, capacidade) resolvido 1x
+# Usa dicionário para armazenar subproblemas e evitar recalculo.
+# =============================================================================
+def portfolio_memoizacao(i, capacidade, projetos, memo):
+    """
+    Usa memoização: salva subproblemas, evita recalculos. Rápido para n e capacidade moderados.
+    """
+    if i < 0 or capacidade <= 0:
+        return 0
+    key = (i, capacidade)
+    if key in memo:
+        return memo[key]
+    nome, valor, horas = projetos[i]
+    if horas > capacidade:
+        resultado = portfolio_memoizacao(i - 1, capacidade, projetos, memo)
+    else:
+        resultado = max(
+            portfolio_memoizacao(i - 1, capacidade, projetos, memo),
+            valor + portfolio_memoizacao(i - 1, capacidade - horas, projetos, memo)
+        )
+    memo[key] = resultado
+    return resultado
