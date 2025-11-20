@@ -85,4 +85,66 @@ def portfolio_memoizacao(i, capacidade, projetos, memo):
             valor + portfolio_memoizacao(i - 1, capacidade - horas, projetos, memo)
         )
     memo[key] = resultado
+
     return resultado
+    # =============================================================================
+# Fase 4: Programação Dinâmica Bottom-Up (Iterativa)
+# COMPLEXIDADE: O(n*C) — constrói matriz T com n+1 linhas e capacidade+1 colunas
+# Mais eficiente para problemas típicos de mochila/portfólio.
+# =============================================================================
+def portfolio_bottomup(projetos, capacidade):
+    """
+    Preenche matriz T[i][c]: valor máximo usando os primeiros i projetos e capacidade c.
+    Mais eficiente do que abordagens recursivas.
+    """
+    N = len(projetos)
+    C = capacidade
+    T = [[0 for _ in range(C + 1)] for _ in range(N + 1)]
+    for i in range(1, N + 1):
+        valor, horas = projetos[i-1][1], projetos[i-1][2]
+        for c in range(C + 1):
+            if horas > c:
+                T[i][c] = T[i-1][c]
+            else:
+                T[i][c] = max(T[i-1][c], valor + T[i-1][c - horas])
+            # Cada célula T[i][c] representa o melhor valor possível com os i projetos e capacidade c
+    return T[N][C]
+
+# =============================================================================
+# ANÁLISE DE DESEMPENHO (TEÓRICA)
+# -----------------------------------------------------------------------------
+# Greedy:      O(n log n) (devido à ordenação). Mais rápida, porém NÃO garante ótimo.
+# Recursiva:   O(2^n) — Dobra para cada projeto, altamente ineficiente. Só para n pequeno.
+# Memoização:  O(n*C) — Muito mais rápida que a recursiva pura. Responde cada subproblema apenas uma vez.
+# Bottom-up:   O(n*C) — Mais eficiente e recomendada na prática, pois não usa pilha de recursão, fácil de adaptar e recuperar quais projetos foram escolhidos.
+#
+# Entre todas, PD Bottom-Up é a mais eficiente e segura para casos práticos — rápida, previsível e escalável
+# ==============================================================================
+
+print('\n--- CASO BASE (PORTFÓLIO PADRÃO) ---')
+print('--Fase 1: Solução Gulosa--')
+sel_greedy, v_greedy = portfolio_greedy(projetos, capacidade_maxima)
+print(f"[Greedy] Valor: {v_greedy}")
+
+print('--Fase 2: Solução Recursiva Pura--')
+v_rec = portfolio_recursivo(len(projetos) - 1, capacidade_maxima, projetos)
+print(f"[Recursiva] Valor: {v_rec}")
+
+print('--Fase 3: PD Top-Down (Memoização)--')
+memo = {}
+v_memo = portfolio_memoizacao(len(projetos) - 1, capacidade_maxima, projetos, memo)
+print(f"[Memoização] Valor: {v_memo}")
+
+print('--Fase 4: PD Bottom-Up (Iterativa)--')
+v_bottom = portfolio_bottomup(projetos, capacidade_maxima)
+print(f"[Bottom-Up] Valor: {v_bottom}")
+
+print('\n--- CASO DE FALHA DA ESTRATÉGIA GULOSA ---')
+print('Projetos:', [(n, v, e) for n, v, e in caso_falha_gulosa])
+sel_greedy, v_greedy = portfolio_greedy(caso_falha_gulosa, 10)
+print(f"[Greedy] Valor: {v_greedy}")   # Não é ótimo!
+memo = {}
+v_memo = portfolio_memoizacao(len(caso_falha_gulosa)-1, 10, caso_falha_gulosa, memo)
+print(f"[PD] Valor ótimo: {v_memo}")  # Ótimo!
+v_bottom = portfolio_bottomup(caso_falha_gulosa, 10)
+print(f"[Bottom-Up] Valor ótimo: {v_bottom}")
